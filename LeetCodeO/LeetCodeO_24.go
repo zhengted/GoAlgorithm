@@ -1,8 +1,6 @@
 package LeetCodeO
 
-import (
-	. "GoAlgorithm"
-)
+import . "GoAlgorithm/Common"
 
 func reverseList(head *ListNode) *ListNode {
 	// 1. 头插法

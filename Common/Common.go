@@ -1,4 +1,4 @@
-package GoAlgorithm
+package Common
 
 type ListNode struct {
 	Val  int

@@ -1,7 +1,7 @@
 package LeetCodeO
 
 import (
-	. "GoAlgorithm"
+	. "GoAlgorithm/Common"
 	"strconv"
 	"strings"
 )
