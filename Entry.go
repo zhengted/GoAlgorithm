@@ -1,11 +1,12 @@
 package main
 
 import (
+	"GoAlgorithm/Zuo"
 	"fmt"
 )
 
 func main() {
-	testPartition()
+	fmt.Println(Zuo.FixValue([]int{10, 20, 50}, 30))
 }
 
 func testPartition() {
