@@ -1,6 +1,9 @@
 package Zuo
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 //返回菲薄拿起数列第n项
 func Fibonacci(n int) int {
@@ -203,10 +206,77 @@ func dpFixValue(arr []int, target int) int {
 	return dp[0][target]
 }
 
-func Stick(target string, backUp []string) int {
-
+// 两个字符串的最长公共子序列问题
+func CommonSeries(a, b string) int {
+	return commonSeriesForce(a, b)
 }
 
-func minS(rest string, arr []string) int {
+func commonSeriesForce(restA, restB string) int {
+	fmt.Println(restA, restB)
+	if len(restA) == 0 || len(restB) == 0 {
+		return 0
+	}
+	bytesA := []byte(restA)
+	bytesB := []byte(restB)
 
+	ret := math.MinInt32
+	temp := 0
+	for _, firstA := range bytesA {
+		temp = 0
+		for i, ch := range bytesB {
+			if firstA == ch {
+				temp += commonSeriesForce(restA[1:], restB[i+1:]) + 1
+			}
+		}
+		ret = maxInt(ret, temp)
+	}
+
+	return ret
+}
+
+// i,j : a从0到i字符串和b从0到j的公共子序列长度
+func CommonSeriesDp(strA, strB string) int {
+	dp := make([][]int, len(strA))   // 行为strA的长度
+	for i := 0; i < len(strA); i++ { // 列为strB的长度
+		dp[i] = make([]int, len(strB))
+	}
+	bytesA := []byte(strA)
+	bytesB := []byte(strB)
+
+	// 处理最左上角
+	if bytesA[0] == bytesB[0] {
+		dp[0][0] = 1
+	}
+
+	// 处理第一行
+	for i := 1; i < len(bytesB); i++ {
+		if bytesA[0] == bytesB[i] {
+			dp[0][i] = dp[0][i-1] + 1
+		} else {
+			dp[0][i] = dp[0][i-1]
+		}
+	}
+
+	// 处理第一列
+	for j := 1; j < len(bytesA); j++ {
+		if bytesB[0] == bytesA[j] {
+			dp[j][0] = dp[j-1][0] + 1
+		} else {
+			dp[j][0] = dp[j-1][0]
+		}
+	}
+
+	// 处理剩余数据
+	for i := 1; i < len(bytesA); i++ {
+		for j := 1; j < len(bytesB); j++ {
+			temp := maxInt(dp[i-1][j], maxInt(dp[i][j-1], dp[i-1][j-1]))
+			if bytesB[j] == bytesA[i] {
+				dp[i][j] = temp + 1
+			} else {
+				dp[i][j] = temp
+			}
+		}
+	}
+	fmt.Println(dp)
+	return dp[len(bytesA)-1][len(bytesB)-1]
 }

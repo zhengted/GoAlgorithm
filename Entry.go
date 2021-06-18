@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	fmt.Println(Zuo.FixValue([]int{10, 20, 50}, 30))
+	fmt.Println(Zuo.CommonSeriesDp("a123bc", "12de3f"))
 }
 
 func testPartition() {
