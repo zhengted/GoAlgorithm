@@ -1,12 +1,12 @@
 package main
 
 import (
-	"GoAlgorithm/Zuo"
+	"GoAlgorithm/LC"
 	"fmt"
 )
 
 func main() {
-	fmt.Println(Zuo.FixValue([]int{10, 20, 50}, 30))
+	fmt.Println(LC.CountSubstringsDP("aaa"))
 }
 
 func testPartition() {
