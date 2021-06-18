@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	fmt.Println(LC.CountSubstringsDP("aaa"))
+	fmt.Println(LC.GenerateTreesDp(3))
 }
 
 func testPartition() {
