@@ -280,3 +280,67 @@ func CommonSeriesDp(strA, strB string) int {
 	fmt.Println(dp)
 	return dp[len(bytesA)-1][len(bytesB)-1]
 }
+
+// 给定一个数组表示每个人喝完咖啡准备刷杯子的时间
+// 只有一台洗杯机，一次只能洗一个杯子，时间耗费a
+// 也可以自己挥发干净 时间耗费b 挥发可并行
+func WashCup(arr []int, a, b int) int {
+	return WashCupDp(arr, a, b)
+}
+
+// a,b,drinks 固定变量
+// index:  drinks[0...index-1]已经干净了，不用你操心了
+// washLine: 洗杯机在该时间点才可用
+func washCupForce(drinks []int, a, b, index, washLine int) int {
+	if index == len(drinks)-1 {
+		return minInt(
+			maxInt(washLine, drinks[index])+a, // 假设27喝完，洗杯机12能用，那么得到27+3，假设我11喝完 12才能用 的搭配12+3
+			drinks[index]+b,                   // 让杯子自行挥发
+		) //两者取较小值
+	}
+
+	// wash是我当前的咖啡杯洗完的时间
+	wash := maxInt(washLine, drinks[index]) + a // 决定洗了
+	next1 := washCupForce(drinks, a, b, index+1, wash)
+	p1 := maxInt(wash, next1)
+
+	dry := drinks[index] + b // 决定自行挥发了
+	next2 := washCupForce(drinks, a, b, index+1, washLine)
+	p2 := maxInt(dry, next2)
+
+	return minInt(p1, p2)
+}
+
+func WashCupDp(drinks []int, a, b int) int {
+	n := len(drinks)
+	dp := make([][]int, n-1)
+	if a >= b {
+		return drinks[n-1] + b
+	}
+	limit := 0 // 洗杯机什么时候可用
+	for i := 0; i < n; i++ {
+		limit = maxInt(limit, drinks[i]) + a
+	}
+	for i := 0; i < n; i++ {
+		dp[i] = make([]int, limit+1)
+	}
+
+	for washLine := 0; washLine < limit+1; washLine++ {
+		dp[n-1][washLine] = minInt(maxInt(washLine, drinks[n-1])+a, drinks[n-1]+b)
+	}
+
+	for index := n - 2; index >= 0; index++ {
+		for washLine := 0; washLine < limit+1; washLine++ {
+			wash := maxInt(washLine, drinks[index]) + a
+			p1 := math.MaxInt32
+			if wash <= limit {
+				p1 = maxInt(wash, dp[index+1][wash])
+			}
+			p2 := maxInt(drinks[index]+b, dp[index+1][washLine])
+
+			dp[index][washLine] = minInt(p1, p2)
+		}
+	}
+
+	return dp[0][0]
+}
