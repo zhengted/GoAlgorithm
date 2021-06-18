@@ -1,6 +1,9 @@
 package Zuo
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 //返回菲薄拿起数列第n项
 func Fibonacci(n int) int {
@@ -203,10 +206,141 @@ func dpFixValue(arr []int, target int) int {
 	return dp[0][target]
 }
 
-func Stick(target string, backUp []string) int {
-
+// 两个字符串的最长公共子序列问题
+func CommonSeries(a, b string) int {
+	return commonSeriesForce(a, b)
 }
 
-func minS(rest string, arr []string) int {
+func commonSeriesForce(restA, restB string) int {
+	fmt.Println(restA, restB)
+	if len(restA) == 0 || len(restB) == 0 {
+		return 0
+	}
+	bytesA := []byte(restA)
+	bytesB := []byte(restB)
 
+	ret := math.MinInt32
+	temp := 0
+	for _, firstA := range bytesA {
+		temp = 0
+		for i, ch := range bytesB {
+			if firstA == ch {
+				temp += commonSeriesForce(restA[1:], restB[i+1:]) + 1
+			}
+		}
+		ret = maxInt(ret, temp)
+	}
+
+	return ret
+}
+
+// i,j : a从0到i字符串和b从0到j的公共子序列长度
+func CommonSeriesDp(strA, strB string) int {
+	dp := make([][]int, len(strA))   // 行为strA的长度
+	for i := 0; i < len(strA); i++ { // 列为strB的长度
+		dp[i] = make([]int, len(strB))
+	}
+	bytesA := []byte(strA)
+	bytesB := []byte(strB)
+
+	// 处理最左上角
+	if bytesA[0] == bytesB[0] {
+		dp[0][0] = 1
+	}
+
+	// 处理第一行
+	for i := 1; i < len(bytesB); i++ {
+		if bytesA[0] == bytesB[i] {
+			dp[0][i] = dp[0][i-1] + 1
+		} else {
+			dp[0][i] = dp[0][i-1]
+		}
+	}
+
+	// 处理第一列
+	for j := 1; j < len(bytesA); j++ {
+		if bytesB[0] == bytesA[j] {
+			dp[j][0] = dp[j-1][0] + 1
+		} else {
+			dp[j][0] = dp[j-1][0]
+		}
+	}
+
+	// 处理剩余数据
+	for i := 1; i < len(bytesA); i++ {
+		for j := 1; j < len(bytesB); j++ {
+			temp := maxInt(dp[i-1][j], maxInt(dp[i][j-1], dp[i-1][j-1]))
+			if bytesB[j] == bytesA[i] {
+				dp[i][j] = temp + 1
+			} else {
+				dp[i][j] = temp
+			}
+		}
+	}
+	fmt.Println(dp)
+	return dp[len(bytesA)-1][len(bytesB)-1]
+}
+
+// 给定一个数组表示每个人喝完咖啡准备刷杯子的时间
+// 只有一台洗杯机，一次只能洗一个杯子，时间耗费a
+// 也可以自己挥发干净 时间耗费b 挥发可并行
+func WashCup(arr []int, a, b int) int {
+	return WashCupDp(arr, a, b)
+}
+
+// a,b,drinks 固定变量
+// index:  drinks[0...index-1]已经干净了，不用你操心了
+// washLine: 洗杯机在该时间点才可用
+func washCupForce(drinks []int, a, b, index, washLine int) int {
+	if index == len(drinks)-1 {
+		return minInt(
+			maxInt(washLine, drinks[index])+a, // 假设27喝完，洗杯机12能用，那么得到27+3，假设我11喝完 12才能用 的搭配12+3
+			drinks[index]+b,                   // 让杯子自行挥发
+		) //两者取较小值
+	}
+
+	// wash是我当前的咖啡杯洗完的时间
+	wash := maxInt(washLine, drinks[index]) + a // 决定洗了
+	next1 := washCupForce(drinks, a, b, index+1, wash)
+	p1 := maxInt(wash, next1)
+
+	dry := drinks[index] + b // 决定自行挥发了
+	next2 := washCupForce(drinks, a, b, index+1, washLine)
+	p2 := maxInt(dry, next2)
+
+	return minInt(p1, p2)
+}
+
+func WashCupDp(drinks []int, a, b int) int {
+	n := len(drinks)
+	dp := make([][]int, n-1)
+	if a >= b {
+		return drinks[n-1] + b
+	}
+	limit := 0 // 洗杯机什么时候可用
+	for i := 0; i < n; i++ {
+		limit = maxInt(limit, drinks[i]) + a
+	}
+	for i := 0; i < n; i++ {
+		dp[i] = make([]int, limit+1)
+	}
+
+	for washLine := 0; washLine < limit+1; washLine++ {
+		dp[n-1][washLine] = minInt(maxInt(washLine, drinks[n-1])+a, drinks[n-1]+b)
+	}
+
+	for index := n - 2; index >= 0; index++ {
+		for washLine := 0; washLine < limit+1; washLine++ {
+			wash := maxInt(washLine, drinks[index]) + a
+			p1 := math.MaxInt32
+			if wash <= limit {
+				p1 = maxInt(wash, dp[index+1][wash])
+			}
+			p2 := maxInt(drinks[index]+b, dp[index+1][washLine])
+
+			dp[index][washLine] = minInt(p1, p2)
+		}
+	}
+
+	return dp[0][0]
 }
