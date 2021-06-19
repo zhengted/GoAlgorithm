@@ -167,3 +167,63 @@ func UnSerialTreeByLayer(arr []string) *TreeNode {
 	}
 	return root
 }
+
+// 二叉搜索树
+// 搜索功能
+func search(aim int, root *TreeNode) *TreeNode {
+	if nil == root || aim == root.Val {
+		return root
+	}
+	if aim > root.Val {
+		return search(aim, root.Right)
+	} else {
+		return search(aim, root.Left)
+	}
+}
+
+// 增加节点
+func insert(target int, root *TreeNode) *TreeNode {
+	if nil == root {
+		return &TreeNode{target, nil, nil}
+	}
+	if target > root.Val {
+		root.Right = insert(target, root.Right)
+	} else if target < root.Val {
+		root.Left = insert(target, root.Left)
+	}
+	return root
+}
+
+// 删除节点
+func delete(target int, root *TreeNode) *TreeNode {
+	if nil == root {
+		return nil
+	}
+	if root.Val == target {
+		if root.Left == nil {
+			return root.Right
+		}
+		if root.Right == nil {
+			return root.Left
+		}
+		successor := findSuccessor(root)
+		root.Val = successor.Val
+		root.Right = delete(successor.Val, root.Right)
+		return root
+	}
+	if target > root.Val {
+		root.Right = delete(target, root.Right)
+	}
+	if target < root.Val {
+		root.Left = delete(target, root.Left)
+	}
+	return root
+}
+
+func findSuccessor(treeNode *TreeNode) *TreeNode {
+	cur := treeNode.Right
+	for cur != nil && cur.Left != nil {
+		cur = cur.Left
+	}
+	return cur
+}
