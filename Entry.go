@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	fmt.Println(LC.GenerateTreesDp(3))
+	LC.MaxLength()
 }
 
 func testPartition() {
